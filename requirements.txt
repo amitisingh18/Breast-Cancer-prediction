@@ -1,3 +1,7 @@
+## Update requirements.txt on GitHub too
+
+Delete the old one and create new with:
+```
 streamlit
 torch
 torchvision
@@ -7,3 +11,5 @@ pandas
 opencv-python-headless
 grad-cam
 gdown
+reportlab
+matplotlib
