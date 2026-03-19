@@ -227,7 +227,7 @@ def load_model():
 
     if not os.path.exists(MODEL_PATH):
         with st.spinner("Loading AI model... please wait"):
-            url = "https://drive.google.com/uc?id=YOUR_FILE_ID"
+            url = "https://drive.google.com/uc?id=https://drive.google.com/file/d/1nIRDmii9wH7ZTgZGe6BrmWHAhZUBbHnq/view?usp=sharing"
             gdown.download(url, MODEL_PATH, quiet=False)
 
     if not os.path.exists(CLASS_NAMES_PATH):
