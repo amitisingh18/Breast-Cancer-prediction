@@ -1,11 +1,11 @@
 streamlit
-torch
-torchvision
-pillow
 numpy
 pandas
-opencv-python-headless
-grad-cam
+pillow
+matplotlib
 gdown
 reportlab
-matplotlib
+torch
+torchvision
+opencv-python-headless
+grad-cam
