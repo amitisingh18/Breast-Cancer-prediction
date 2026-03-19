@@ -842,7 +842,3 @@ elif "About" in page:
     Built by an **AIML Engineering Student (6th Semester)** using:
     PyTorch · EfficientNet · Grad-CAM · Streamlit · Python
     """)
-```
-
----
-
