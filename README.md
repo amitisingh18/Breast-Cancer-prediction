@@ -19,18 +19,6 @@ AI-powered breast cancer prediction app using EfficientNet-B3
 
 ---
 
-## 📸 Screenshots
-
-| Home Screen | Prediction Result | Downloaded Report |
-
-## 📸 Screenshots
-
-| Home Screen | Prediction Result | Grad-CAM Heatmap |
-|---|---|---|
-| ![Home](assets/Screenshot 2026-03-19 1903531.png) | ![Result](assets/Screenshot 2026-03-19 190436.png) | ![Heatmap](assets/Screenshot 2026-03-19 190458.png) |
-
----
-
 ## 🧠 Model Details
 
 | Property | Value |
