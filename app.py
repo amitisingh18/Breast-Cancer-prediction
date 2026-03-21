@@ -8,9 +8,7 @@ import json
 import os
 import pandas as pd
 from datetime import datetime
-from pytorch_grad_cam import GradCAM
-from pytorch_grad_cam.utils.image import show_cam_on_image
-from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
+import matplotlib.cm as cm
 import gdown
 import time
 
@@ -267,16 +265,60 @@ def predict(image, model, CLASS_NAMES):
 
 # ── Grad-CAM ──────────────────────────────────────────
 def get_gradcam(image, model):
-    tensor       = transform(image).unsqueeze(0)
-    target_layer = [model.features[-1]]
-    cam          = GradCAM(model=model, target_layers=target_layer)
-    targets      = [ClassifierOutputTarget(1)]
-    grayscale    = cam(input_tensor=tensor, targets=targets)[0]
-    img_array    = np.array(
+    tensor = transform(image).unsqueeze(0)
+    tensor.requires_grad_()
+
+    # Forward pass
+    model.eval()
+    features = []
+    grads    = []
+
+    def forward_hook(module, input, output):
+        features.append(output)
+
+    def backward_hook(module, grad_in, grad_out):
+        grads.append(grad_out[0])
+
+    handle_f = model.features[-1].register_forward_hook(forward_hook)
+    handle_b = model.features[-1].register_full_backward_hook(backward_hook)
+
+    output = model(tensor)
+    model.zero_grad()
+    output[0, output.argmax()].backward()
+
+    handle_f.remove()
+    handle_b.remove()
+
+    # Compute heatmap
+    pooled_grads = grads[0].mean(dim=[0, 2, 3])
+    activation   = features[0][0]
+
+    for i in range(activation.shape[0]):
+        activation[i, :, :] *= pooled_grads[i]
+
+    heatmap = activation.mean(dim=0).detach().numpy()
+    heatmap = np.maximum(heatmap, 0)
+
+    if heatmap.max() != 0:
+        heatmap /= heatmap.max()
+
+    # Resize heatmap to image size
+    heatmap_pil = Image.fromarray(
+        np.uint8(255 * heatmap)).resize((224, 224))
+    heatmap_arr = np.array(heatmap_pil) / 255.0
+
+    # Apply colormap
+    colored = cm.jet(heatmap_arr)[:, :, :3]
+
+    # Overlay on original image
+    img_arr = np.array(
         image.resize((224, 224))).astype(np.float32) / 255.0
-    if img_array.ndim == 2:
-        img_array = np.stack([img_array] * 3, axis=-1)
-    return show_cam_on_image(img_array, grayscale, use_rgb=True)
+    if img_arr.ndim == 2:
+        img_arr = np.stack([img_arr] * 3, axis=-1)
+
+    overlay = 0.5 * img_arr + 0.5 * colored
+    overlay = np.clip(overlay, 0, 1)
+    return np.uint8(255 * overlay)
 
 # ── Save log ──────────────────────────────────────────
 def save_to_log(filename, label, confidence, probs):
